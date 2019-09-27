@@ -1,10 +1,20 @@
 import os
 import re
+import sys
 
-# Get the path of this file.
-path = os.path.dirname(os.path.realpath(__file__)).replace("\\","/") + "/"
+if len(sys.argv) > 1:
+    path = os.path.realpath(sys.argv[1])
+    print('Getting .vimrc from: %s' % path)
+else:
+    # get .vimrc from the same directory as this script
+    path = os.getcwd() + "/.vimrc"
+    print('Getting .vimrc from current working directory: %s (specify vimrc path in argument to override)' % path)
 
-file = open(path + ".vimrc", "r", encoding='utf-8')
+if os.path.isfile(path):
+    print('ERROR: Cannot find file at path %s' % path)
+    exit(1)
+
+file = open(path)
 lines = file.read().split("\n")
 file.close()
 
