@@ -19,21 +19,21 @@ lines = file.read().split("\n")
 file.close()
 
 maptypes = {
-    "nmap":"normalModeKeyBindings",
-    "vmap":"visualModeKeyBindings",
-    "imap":"insertModeKeyBindings",
-    "nnoremap":"normalModeKeyBindingsNonRecursive",
-    "vnoremap":"visualModeKeyBindingsNonRecursive",
-    "inoremap":"insertModeKeyBindingsNonRecursive"
+    "nmap": "normalModeKeyBindings",
+    "vmap": "visualModeKeyBindings",
+    "imap": "insertModeKeyBindings",
+    "nnoremap": "normalModeKeyBindingsNonRecursive",
+    "vnoremap": "visualModeKeyBindingsNonRecursive",
+    "inoremap": "insertModeKeyBindingsNonRecursive"
 }
 
 maplists = {
-    "nmap":[],
-    "vmap":[],
-    "imap":[],
-    "nnoremap":[],
-    "vnoremap":[],
-    "inoremap":[]
+    "nmap": [],
+    "vmap": [],
+    "imap": [],
+    "nnoremap": [],
+    "vnoremap": [],
+    "inoremap": []
 }
 
 new_file = "{\n"
