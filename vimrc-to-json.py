@@ -10,7 +10,7 @@ else:
     path = os.getcwd() + "/.vimrc"
     print('Getting .vimrc from current working directory: %s (specify vimrc path in argument to override)' % path)
 
-if os.path.isfile(path):
+if not os.path.isfile(path):
     print('ERROR: Cannot find file at path %s' % path)
     exit(1)
 
