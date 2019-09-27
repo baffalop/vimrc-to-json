@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import json
 
 if len(sys.argv) > 1:
     path = os.path.realpath(sys.argv[1])
@@ -19,24 +20,37 @@ lines = file.read().split("\n")
 file.close()
 
 maptypes = {
-    "nmap": "normalModeKeyBindings",
-    "vmap": "visualModeKeyBindings",
-    "imap": "insertModeKeyBindings",
-    "nnoremap": "normalModeKeyBindingsNonRecursive",
-    "vnoremap": "visualModeKeyBindingsNonRecursive",
-    "inoremap": "insertModeKeyBindingsNonRecursive"
+    "nmap": "vim.normalModeKeyBindings",
+    "vmap": "vim.visualModeKeyBindings",
+    "imap": "vim.insertModeKeyBindings",
+    "nnoremap": "vim.normalModeKeyBindingsNonRecursive",
+    "vnoremap": "vim.visualModeKeyBindingsNonRecursive",
+    "inoremap": "vim.insertModeKeyBindingsNonRecursive"
 }
 
-maplists = {
-    "nmap": [],
-    "vmap": [],
-    "imap": [],
-    "nnoremap": [],
-    "vnoremap": [],
-    "inoremap": []
+vsmap = {
+    "vim.normalModeKeyBindings": [],
+    "vim.visualModeKeyBindings": [],
+    "vim.insertModeKeyBindings": [],
+    "vim.normalModeKeyBindingsNonRecursive": [],
+    "vim.visualModeKeyBindingsNonRecursive": [],
+    "vim.insertModeKeyBindingsNonRecursive": []
 }
 
-new_file = "{\n"
+def splitMap(keymap):
+    specialSearch = re.compile("^(<Leader>|<CR>|<Esc>|<Space>|<C-.>)", flags=re.I)
+    result = []
+
+    while len(keymap) > 0:
+        specials = specialSearch.match(keymap)
+        if specials:
+            special = specials.group(1)
+            result.append(special)
+            keymap = keymap[len(special):]
+        else:
+            result.append(keymap[0])
+            keymap = keymap[1:]
+    return result
 
 # Get all the mappings and place them in the correct category.
 for item in lines:
@@ -45,57 +59,12 @@ for item in lines:
         maptype = matches.group(1)
         before = matches.group(2)
         after = matches.group(3)
-        if maptype in maplists:
-            maplists[maptype].append({"before" : before, "after" : after})
 
-# Parses abc to ["a", "b", "c"] and :wq<CR> to [":wq"]
-def mapToJSONList(mapstring, command):
-    map_json = "["
-    if command:
-        map_json += '"' + re.match("(:\w+)", mapstring).group(1) + '"]'
-        return map_json
-    else:
-        parts = re.findall("(<[^>]+>|.)", mapstring)
-        for part in parts:
-
-            if part == '"':
-                part = '\\"'
-
-            map_json += '"' + part + '", '
-
-    # Remove the last ', '
-    return map_json[:-2] + "]"
-
-# Turn all the mappings into JSON format
-for maptype in maplists:
-    maplist = maplists[maptype]
-
-    if len(maplist) > 0:
-        new_file += '"vim.' + maptypes[maptype] + '": [\n'
-
-        for item in maplist:
-            new_file += '{\n"before": '
-            new_file += mapToJSONList(item["before"], False)
-            
-            # Check if it's a command
-            after = item["after"]
-            command = False
-            if after.startswith(":") and len(after) > 1:
-                new_file += ',\n"commands": '
-                command = True
-            else:
-                new_file += ',\n"after": '
-            new_file += mapToJSONList(item["after"], command)
-            new_file += '\n},\n'
-
-        # Remove the last ',\n'
-        new_file = new_file[:-2]
-        new_file += "\n],\n"
-
-# Remove the last '],\n'
-new_file = new_file[:-2] + "\n}"
+        if maptype in maptypes:
+            maptype = maptypes[maptype]
+            vsmap[maptype].append({"before" : splitMap(before), "after" : splitMap(after)})
 
 # Write the JSON to settings.json in the same directory.
-file = open(path + "settings.json", "w")
-file.write(new_file)
+file = open(os.path.dirname(path) + "/settings.json", "w")
+file.write(json.dumps(vsmap, indent=4))
 file.close()
