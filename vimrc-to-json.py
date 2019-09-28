@@ -19,6 +19,8 @@ file = open(path)
 lines = file.read().split("\n")
 file.close()
 
+specialSearch = re.compile("^(<Leader>|<CR>|<Esc>|<Space>|<C-.>)", flags=re.I)
+
 maptypes = {
     "nmap": "vim.normalModeKeyBindings",
     "vmap": "vim.visualModeKeyBindings",
@@ -26,6 +28,11 @@ maptypes = {
     "nnoremap": "vim.normalModeKeyBindingsNonRecursive",
     "vnoremap": "vim.visualModeKeyBindingsNonRecursive",
     "inoremap": "vim.insertModeKeyBindingsNonRecursive"
+}
+
+multimaptypes = {
+    "map": ("nmap", "vmap"),
+    "noremap": ("nnoremap", "vnoremap"),
 }
 
 vsmap = {
@@ -38,7 +45,6 @@ vsmap = {
 }
 
 def splitMap(keymap):
-    specialSearch = re.compile("^(<Leader>|<CR>|<Esc>|<Space>|<C-.>)", flags=re.I)
     result = []
 
     while len(keymap) > 0:
@@ -55,14 +61,22 @@ def splitMap(keymap):
 # Get all the mappings and place them in the correct category.
 for item in lines:
     matches = re.match("(^.*map)\s([\S]+)\s+([\S]+)$", item)
-    if matches:
-        maptype = matches.group(1)
-        before = matches.group(2)
-        after = matches.group(3)
+    if not matches:
+        continue
 
-        if maptype in maptypes:
+    mapname = matches.group(1)
+    mapping = {
+        "before": splitMap(matches.group(2)),
+        "after": splitMap(matches.group(3)),
+    }
+
+    if mapname in maptypes:
+        maptype = maptypes[mapname]
+        vsmap[maptype].append(mapping)
+    elif mapname in multimaptypes:
+        for maptype in multimaptypes[mapname]:
             maptype = maptypes[maptype]
-            vsmap[maptype].append({"before" : splitMap(before), "after" : splitMap(after)})
+            vsmap[maptype].append(mapping)
 
 # Write the JSON to settings.json in the same directory.
 file = open(os.path.dirname(path) + "/settings.json", "w")
