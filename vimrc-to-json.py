@@ -58,9 +58,11 @@ def splitMap(keymap):
             keymap = keymap[1:]
     return result
 
+mapPattern = re.compile("^(\w*map)\s+(\S+)\s+(\S+)")
+
 # Get all the mappings and place them in the correct category.
 for item in lines:
-    matches = re.match("(^.*map)\s([\S]+)\s+([\S]+)$", item)
+    matches = mapPattern.match(item)
     if not matches:
         continue
 
@@ -77,6 +79,9 @@ for item in lines:
         for maptype in multimaptypes[mapname]:
             maptype = maptypes[maptype]
             vsmap[maptype].append(mapping)
+
+print(json.dumps(vsmap, indent=4))
+exit(0)
 
 # Write the JSON to settings.json in the same directory.
 file = open(os.path.dirname(path) + "/settings.json", "w")
