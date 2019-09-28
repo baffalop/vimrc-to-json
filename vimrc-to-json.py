@@ -9,7 +9,15 @@ if len(sys.argv) > 1:
 else:
     # get .vimrc from the same directory as this script
     path = os.getcwd() + "/.vimrc"
-    print('Getting .vimrc from current working directory: %s (specify vimrc path in argument to override)' % path)
+    print('Getting .vimrc from current working directory: %s (specify vimrc path in 1st argument to override)' % path)
+
+if len(sys.argv) > 2:
+    settingsPath = os.path.realpath(sys.argv[2])
+    print('Getting settings.json from: %s' % settingsPath)
+else:
+    # get .vimrc from the same directory as this script
+    settingsPath = os.path.dirname(path) + "/settings.json"
+    print('Getting settings.json from .vimrc directory: %s (specify settings.json path in 2nd argument to override)' % path)
 
 if not os.path.isfile(path):
     print('ERROR: Cannot find file at path %s' % path)
@@ -80,10 +88,7 @@ for item in lines:
             maptype = maptypes[maptype]
             vsmap[maptype].append(mapping)
 
-print(json.dumps(vsmap, indent=4))
-exit(0)
-
 # Write the JSON to settings.json in the same directory.
-file = open(os.path.dirname(path) + "/settings.json", "w")
+file = open(settingsPath, "w")
 file.write(json.dumps(vsmap, indent=4))
 file.close()
