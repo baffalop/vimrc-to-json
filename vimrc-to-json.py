@@ -34,8 +34,6 @@ if os.path.isfile(settingsPath):
     file = open(settingsPath)
     settings = json.loads(file.read())
 
-specialSearch = re.compile("^(<Leader>|<CR>|<Esc>|<Space>|<C-.>)", flags=re.I)
-
 maptypes = {
     "nmap": "vim.normalModeKeyBindings",
     "vmap": "vim.visualModeKeyBindings",
@@ -50,6 +48,14 @@ multimaptypes = {
     "noremap": ("nnoremap", "vnoremap"),
 }
 
+lets = {
+    "mapleader": "vim.leader",
+}
+
+sets = {
+    "hlsearch": "vim.hlsearch",
+}
+
 vsmap = {
     "vim.normalModeKeyBindings": {},
     "vim.visualModeKeyBindings": {},
@@ -59,11 +65,16 @@ vsmap = {
     "vim.insertModeKeyBindingsNonRecursive": {}
 }
 
+reMappings = re.compile("^(\w*map)\s+(\S+)\s+(\S+)")
+reLet = re.compile("^let (\S+)\s*=\s*(.*)")
+reSet = re.compile("^set (\w+)(?:\s*=\s*(.*))?")
+reSpecials = re.compile("^(<Leader>|<CR>|<Esc>|<Space>|<C-.>)", flags=re.I)
+
 def splitMap(keymap):
     result = []
 
     while len(keymap) > 0:
-        specials = specialSearch.match(keymap)
+        specials = reSpecials.match(keymap)
         if specials:
             special = specials.group(1)
             result.append(special)
@@ -82,11 +93,9 @@ for maptype in vsmap.keys():
     if maptype in settings:
         vsmap[maptype] = mappingsListToDict(settings[maptype])
 
-mapPattern = re.compile("^(\w*map)\s+(\S+)\s+(\S+)")
-
 # Parse vimrc into mappings and add to vsmap dict
 for item in lines:
-    matches = mapPattern.match(item)
+    matches = reMappings.match(item)
     if not matches:
         continue
 
