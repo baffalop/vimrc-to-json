@@ -68,7 +68,7 @@ vsmap = {
 reMappings = re.compile("^(\w*map)\s+(\S+)\s+(\S+)")
 reLet = re.compile("^let (\S+)\s*=\s*(.*)")
 reSet = re.compile("^set (\w+)(?:\s*=\s*(.*))?")
-reSpecials = re.compile("^(<(?:Leader|Cr|BS|Left|Right|Up|Down|Esc|Space|C-.)>)", flags=re.I)
+reSpecials = re.compile("^(<(?:Leader|Cr|BS|Left|Right|Up|Down|Esc|Space|[CAS]-.)>)", flags=re.I)
 
 def splitMap(keymap):
     result = []
